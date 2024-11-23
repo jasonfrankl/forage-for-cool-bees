@@ -1,5 +1,5 @@
-# Stage 1: Build the Angular app
-FROM node:21 as build
+# Build the Angular app
+FROM node:18 AS build
 
 WORKDIR /app
 
@@ -10,11 +10,14 @@ COPY . .
 
 RUN npm run build -- --configuration production
 
-# Stage 2: Serve the app with Nginx
+# Use Nginx to serve the app
 FROM nginx:alpine
 
+# Copy the built app from the previous stage
 COPY --from=build /app/dist/forage-for-cool-bees-frontend /usr/share/nginx/html
 
+# Expose port 80
 EXPOSE 80
 
+# Start Nginx when the container starts
 CMD ["nginx", "-g", "daemon off;"]
