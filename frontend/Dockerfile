@@ -1,27 +1,23 @@
-# Stage 1: Build the Angular app
-FROM node:20 AS build
+# Use Node.js LTS version
+FROM node:20
 
-WORKDIR /app
+# Install Angular CLI globally
+RUN npm install -g @angular/cli
+
+# Set the working directory
+WORKDIR /frontend
+
+# Copy the package.json and package-lock.json
+COPY frontend/package.json frontend/package-lock.json ./
 
 # Install dependencies
-COPY frontend/package.json frontend/package-lock.json ./
 RUN npm install
 
-# Copy the source code and build the app
-COPY frontend/. .
-RUN npm run build -- --configuration production
+# Copy the rest of the application code
+COPY frontend/ .
 
-# Stage 2: Serve the app with Nginx
-FROM nginx:latest
+# Expose port 4200
+EXPOSE 4200
 
-# Copy the built Angular app (browser files) to Nginx's serving directory
-COPY --from=build /app/dist/forage-for-cool-bees-frontend/browser /usr/share/nginx/html
-
-# Copy Nginx configuration
-COPY proxy/default.conf.template /etc/nginx/conf.d/default.conf
-
-# Expose port 80
-EXPOSE 80
-
-# Start Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Run the Angular development server
+CMD ["ng", "serve", "--host", "0.0.0.0"]
